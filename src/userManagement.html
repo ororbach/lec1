@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>User Management - Admin</title>
+</head>
+<body class="bg-gray-50 p-6 sm:p-12">
+
+    <div class="max-w-5xl mx-auto bg-white p-8 rounded-2xl shadow-xl">
+        <div class="flex justify-between items-center mb-8 border-b pb-4">
+            <h1 id="welcomeTitle" class="text-3xl font-extrabold text-blue-700">Welcome</h1>
+            <button onclick="logout()" class="bg-red-100 text-red-600 px-4 py-2 rounded-lg hover:bg-red-200 transition-colors font-medium">
+                Logout
+            </button>
+        </div>
+        
+        <h2 class="text-xl font-bold text-gray-800 mb-4 uppercase tracking-wide">Registered Users</h2>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-100 rounded-lg">
+                <thead>
+                    <tr class="bg-gray-100 text-gray-600 text-sm leading-normal">
+                        <th class="py-3 px-6 text-left">Username</th>
+                        <th class="py-3 px-6 text-left">Email</th>
+                        <th class="py-3 px-6 text-left">Role</th>
+                        <th class="py-3 px-6 text-left">Date of Birth</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody" class="text-gray-600 text-sm">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // לוגיקה לבדיקת הרשאות והצגת נתונים
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        const allUsers = JSON.parse(localStorage.getItem('users')) || [];
+
+        // 1. אבטחה: אם לא מחובר או לא אדמין - חסום גישה
+        if (!currentUser || currentUser.role !== 'admin') {
+            alert("Access Denied: Admins Only!");
+            window.location.href = '/src/login.html';
+        } else {
+            // 2. עדכון כותרת ברוך הבא
+            document.getElementById('welcomeTitle').textContent = `Welcome, ${currentUser.username}`;
+
+            // 3. מילוי הטבלה בנתונים
+            const tableBody = document.getElementById('usersTableBody');
+            
+            allUsers.forEach(user => {
+                const row = document.createElement('tr');
+                row.className = "border-b border-gray-100 hover:bg-gray-50 transition-colors";
+                
+                // עיצוב תגית התפקיד (אדמין בסגול, יוזר באפור)
+                const roleClass = user.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600';
+
+                row.innerHTML = `
+                    <td class="py-3 px-6 text-left font-medium text-gray-900">${user.username}</td>
+                    <td class="py-3 px-6 text-left">${user.email}</td>
+                    <td class="py-3 px-6 text-left">
+                        <span class="${roleClass} py-1 px-3 rounded-full text-xs font-bold uppercase">
+                            ${user.role}
+                        </span>
+                    </td>
+                    <td class="py-3 px-6 text-left">${user.dob}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // פונקציית התנתקות
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = '/index.html';
+        }
+    </script>
+</body>
+</html>
